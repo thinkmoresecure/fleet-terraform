@@ -46,6 +46,12 @@ module "fleet-service" {
   source  = "GoogleCloudPlatform/cloud-run/google//modules/v2"
   version = "0.17.2"
 
+  # Wait for database migrations to complete before deploying the new API
+  # revision. Without this, the API service and migration job update in
+  # parallel — the new image tries to start before migrations finish,
+  # fails health checks, and Cloud Run rolls back.
+  depends_on = [terracurl_request.exec]
+
   service_name                  = "fleet-api"
   project_id                    = var.project_id
   location                      = var.region
