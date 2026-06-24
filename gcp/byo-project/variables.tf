@@ -24,6 +24,12 @@ variable "dns_record_name" {
   type        = string
 }
 
+variable "security_policy" {
+  description = "Self-link/ID of a Cloud Armor security policy to attach to the Fleet LB backend service. Null leaves the backend unprotected by Cloud Armor."
+  type        = string
+  default     = null
+}
+
 variable "cache_config" {
   type = object({
     name           = string

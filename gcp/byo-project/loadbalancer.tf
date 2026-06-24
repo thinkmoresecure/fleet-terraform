@@ -29,6 +29,9 @@ module "fleet_lb" {
       description = "Backend for Fleet Cloud Run service"
       enable_cdn  = false # Set to true if you want Cloud CDN
       protocol    = "HTTP"
+
+      # Cloud Armor edge protection (WAF/rate-limit/geo). Null = unprotected.
+      security_policy = var.security_policy
       groups = [
         {
           group = google_compute_region_network_endpoint_group.neg.id
