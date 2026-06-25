@@ -14,9 +14,16 @@ variable "prefix" {
   default = "fleet"
 }
 
+variable "manage_dns" {
+  description = "Whether this module creates the Cloud DNS managed zone and Fleet A record. Set to false when DNS is managed elsewhere (e.g. flat records in an externally managed parent zone)."
+  type        = bool
+  default     = true
+}
+
 variable "dns_zone_name" {
-  description = "The DNS name of the managed zone (e.g., 'my-fleet-infra.com.')"
+  description = "The DNS name of the managed zone (e.g., 'my-fleet-infra.com.'). Unused when manage_dns is false."
   type        = string
+  default     = ""
 }
 
 variable "dns_record_name" {

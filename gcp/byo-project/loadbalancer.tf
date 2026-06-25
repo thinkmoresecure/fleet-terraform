@@ -3,8 +3,9 @@ locals {
   managed_ssl_domain = trim(var.dns_record_name, ".")
 }
 
-# Create/Manage the DNS Zone in Cloud DNS
+# Create/Manage the DNS Zone in Cloud DNS (optional; skipped when manage_dns=false)
 resource "google_dns_managed_zone" "fleet_dns_zone" {
+  count    = var.manage_dns ? 1 : 0
   project  = var.project_id
   name     = "${var.prefix}-zone"
   dns_name = var.dns_zone_name
@@ -53,10 +54,11 @@ module "fleet_lb" {
   depends_on = [google_compute_region_network_endpoint_group.neg]
 }
 
-# Create the DNS A Record for the Load Balancer
+# Create the DNS A Record for the Load Balancer (optional; skipped when manage_dns=false)
 resource "google_dns_record_set" "fleet_dns_record" {
+  count        = var.manage_dns ? 1 : 0
   project      = var.project_id
-  managed_zone = google_dns_managed_zone.fleet_dns_zone.name
+  managed_zone = google_dns_managed_zone.fleet_dns_zone[0].name
   name         = var.dns_record_name
   type         = "A"
   ttl          = 300 # Time-to-live in seconds
