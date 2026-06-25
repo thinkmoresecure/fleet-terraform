@@ -46,6 +46,12 @@ module "fleet-service" {
   source  = "GoogleCloudPlatform/cloud-run/google//modules/v2"
   version = "0.17.2"
 
+  # Wait for database migrations to complete before deploying the new API
+  # revision. Without this, the API service and migration job update in
+  # parallel — the new image tries to start before migrations finish,
+  # fails health checks, and Cloud Run rolls back.
+  depends_on = [terracurl_request.exec]
+
   service_name                  = "fleet-api"
   project_id                    = var.project_id
   location                      = var.region
@@ -110,6 +116,12 @@ module "fleet-service" {
 
       resources = {
         limits = local.fleet_resources_limits
+        # CPU must remain allocated outside of request processing so Fleet's
+        # background cron goroutines (e.g. apple_mdm_dep_profile_assigner) can
+        # run reliably. Without this, the throttled CPU between requests
+        # cancels in-flight cron work mid-tick, which can silently drop DEP
+        # device events. See fleetdm/fleet-terraform#242 and fleetdm/fleet#46235.
+        cpu_idle = false
       }
 
       env_vars        = local.fleet_env_vars

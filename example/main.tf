@@ -75,7 +75,7 @@ locals {
 }
 
 module "fleet" {
-  source          = "github.com/fleetdm/fleet-terraform?depth=1&ref=tf-mod-root-v1.28.0"
+  source          = "github.com/fleetdm/fleet-terraform?depth=1&ref=tf-mod-root-v1.30.0"
   certificate_arn = module.acm.acm_certificate_arn
 
   vpc = {
@@ -89,7 +89,7 @@ module "fleet" {
   fleet_config = {
     # To avoid pull-rate limiting from dockerhub, consider using our quay.io mirror
     # for the Fleet image. e.g. "quay.io/fleetdm/fleet:v4.67.0"
-    image = "fleetdm/fleet:v4.86.0" # override default to deploy the image you desire
+    image = "fleetdm/fleet:v4.86.1" # override default to deploy the image you desire
     # See https://fleetdm.com/docs/deploy/reference-architectures#aws for appropriate scaling
     # memory and cpu.
     autoscaling = {
@@ -295,7 +295,7 @@ module "migrations" {
 
 # Enable if using s3 for carves
 # module "osquery-carve" {
-#   source = "github.com/fleetdm/fleet-terraform/addons/osquery-carve?depth=1&ref=tf-mod-addon-osquery-carve-v1.3.1"
+#   source = "github.com/fleetdm/fleet-terraform/addons/osquery-carve?depth=1&ref=tf-mod-addon-osquery-carve-v1.4.0"
 #   osquery_carve_s3_bucket = {
 #     name = local.osquery_carve_bucket_name
 #   }
@@ -303,7 +303,7 @@ module "migrations" {
 
 # Uncomment if using firehose logging destination
 # module "firehose-logging" {
-#   source = "github.com/fleetdm/fleet-terraform/addons/logging-destination-firehose?depth=1&ref=tf-mod-addon-logging-destination-firehose-v1.2.6"
+#   source = "github.com/fleetdm/fleet-terraform/addons/logging-destination-firehose?depth=1&ref=tf-mod-addon-logging-destination-firehose-v1.3.0"
 #   osquery_results_s3_bucket = {
 #     name = local.osquery_results_bucket_name
 #   }

@@ -1,6 +1,6 @@
 output "fleet_application_url" {
   description = "The primary URL to access the Fleet application (via the Load Balancer)."
-  value       = "https://${google_dns_record_set.fleet_dns_record.name}"
+  value       = "https://${var.dns_record_name}"
 }
 
 output "load_balancer_ip_address" {
@@ -59,13 +59,13 @@ output "fleet_service_account_email" {
 }
 
 output "dns_managed_zone_name" {
-  description = "The name of the Cloud DNS managed zone created for Fleet."
-  value       = google_dns_managed_zone.fleet_dns_zone.name
+  description = "The name of the Cloud DNS managed zone created for Fleet (null when manage_dns=false)."
+  value       = one(google_dns_managed_zone.fleet_dns_zone[*].name)
 }
 
 output "dns_managed_zone_name_servers" {
-  description = "The authoritative name servers for the created Cloud DNS managed zone. Delegate your domain to these."
-  value       = google_dns_managed_zone.fleet_dns_zone.name_servers
+  description = "The authoritative name servers for the created Cloud DNS managed zone. Delegate your domain to these (null when manage_dns=false)."
+  value       = one(google_dns_managed_zone.fleet_dns_zone[*].name_servers)
 }
 
 output "vpc_network_name" {

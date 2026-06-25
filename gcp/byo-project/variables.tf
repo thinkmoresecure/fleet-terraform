@@ -14,14 +14,27 @@ variable "prefix" {
   default = "fleet"
 }
 
+variable "manage_dns" {
+  description = "Whether this module creates the Cloud DNS managed zone and Fleet A record. Set to false when DNS is managed elsewhere (e.g. flat records in an externally managed parent zone)."
+  type        = bool
+  default     = true
+}
+
 variable "dns_zone_name" {
-  description = "The DNS name of the managed zone (e.g., 'my-fleet-infra.com.')"
+  description = "The DNS name of the managed zone (e.g., 'my-fleet-infra.com.'). Unused when manage_dns is false."
   type        = string
+  default     = ""
 }
 
 variable "dns_record_name" {
   description = "The DNS record for Fleet (e.g., 'fleet.my-fleet-infra.com.')"
   type        = string
+}
+
+variable "security_policy" {
+  description = "Self-link/ID of a Cloud Armor security policy to attach to the Fleet LB backend service. Null leaves the backend unprotected by Cloud Armor."
+  type        = string
+  default     = null
 }
 
 variable "cache_config" {
@@ -107,7 +120,7 @@ variable "fleet_config" {
     })))
   })
   default = {
-    image_tag              = "fleetdm/fleet:v4.86.0"
+    image_tag              = "fleetdm/fleet:v4.86.1"
     installers_bucket_name = ""
     fleet_cpu              = "1000m"
     fleet_memory           = "4096Mi"
