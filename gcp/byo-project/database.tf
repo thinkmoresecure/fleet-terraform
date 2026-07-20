@@ -30,6 +30,8 @@ module "mysql" {
   db_collation         = var.database_config.collation
   db_charset           = var.database_config.charset
 
+  backup_configuration = var.database_config.backup_configuration
+
   ip_configuration = {
     ipv4_enabled = false
     # We never set authorized networks, we need all connections via the
