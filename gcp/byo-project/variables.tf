@@ -64,6 +64,20 @@ variable "database_config" {
     deletion_protection = bool
     database_version    = string
     tier                = string
+    # Optional declarative automated-backup / PITR settings. Passed straight
+    # through to the terraform-google-modules mysql module. Omit (defaults to
+    # {}) to keep the module's own behaviour (note: REGIONAL instances force
+    # backups + binary logging on regardless). Set explicit values to codify
+    # backups in git rather than relying on out-of-band console configuration.
+    backup_configuration = optional(object({
+      enabled                        = optional(bool)
+      binary_log_enabled             = optional(bool)
+      start_time                     = optional(string)
+      location                       = optional(string)
+      transaction_log_retention_days = optional(string)
+      retained_backups               = optional(number)
+      retention_unit                 = optional(string)
+    }), {})
   })
   default = {
     name                = "fleet-mysql"
@@ -112,8 +126,13 @@ variable "fleet_config" {
     min_instance_count     = number
     max_instance_count     = number
     exec_migration         = bool
-    use_h2c                = bool
-    extra_env_vars         = optional(map(string))
+    # When true (and exec_migration is true), the Fleet API service waits for the
+    # migration Cloud Run Job execution to *complete* — not merely be triggered —
+    # before the new revision deploys. Requires curl + python3 in the apply
+    # runtime. Defaults to false to preserve the prior fire-and-forget behaviour.
+    exec_migration_wait = optional(bool, false)
+    use_h2c             = bool
+    extra_env_vars      = optional(map(string))
     extra_secret_env_vars = optional(map(object({
       secret  = string
       version = string
@@ -128,6 +147,7 @@ variable "fleet_config" {
     min_instance_count     = 1
     max_instance_count     = 5
     exec_migration         = true
+    exec_migration_wait    = false
     use_h2c                = false
     extra_env_vars         = {}
     extra_secret_env_vars  = {}

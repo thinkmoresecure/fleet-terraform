@@ -215,6 +215,65 @@ resource "terracurl_request" "exec" {
   }
 }
 
+# Wait for the migration Cloud Run Job execution to actually COMPLETE (not just
+# be triggered) before the new Fleet API revision deploys.
+#
+# terracurl_request.exec POSTs the job ":run" endpoint, which returns a
+# long-running Operation immediately (fire-and-forget). So the fleet-service's
+# `depends_on = [terracurl_request.exec]` only guarantees migrations were
+# *started*, not *finished*. On a Fleet version bump the new API image then boots
+# before migrations complete and exits(1) on pending migrations, failing its
+# startup probe while traffic stays on the old revision — a stuck upgrade
+# (thinkmoresecure/it#265).
+#
+# This resource polls the Operation returned by ":run" until it reports done,
+# gating the API rollout on real migration completion. Opt-in via
+# fleet_config.exec_migration_wait (default false) since it shells out to
+# curl + python3 in the apply runtime.
+resource "null_resource" "migration_wait" {
+  count = var.fleet_config.exec_migration && var.fleet_config.exec_migration_wait ? 1 : 0
+
+  depends_on = [terracurl_request.exec]
+
+  # terracurl_request.exec re-runs every apply (its bearer token changes), so
+  # re-run this guard every apply to wait on the freshly-launched execution.
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      OP_RESPONSE = try(terracurl_request.exec[0].response, "")
+      TOKEN       = data.google_client_config.default.access_token
+    }
+    command = <<-EOT
+      set -euo pipefail
+      op=$(printf '%s' "$${OP_RESPONSE:-}" | python3 -c "import sys,json; print(json.load(sys.stdin).get('name',''))" 2>/dev/null || true)
+      if [ -z "$${op:-}" ]; then
+        echo "migration_wait: no operation name in migration response; nothing to wait on"
+        exit 0
+      fi
+      echo "migration_wait: waiting for migration operation $${op} to complete"
+      for i in $(seq 1 180); do
+        body=$(curl -sf -H "Authorization: Bearer $${TOKEN}" "https://run.googleapis.com/v2/$${op}" || true)
+        state=$(printf '%s' "$${body:-}" | python3 -c "import sys,json; d=json.load(sys.stdin); print('done' if d.get('done') and not d.get('error') else ('error' if d.get('error') else 'pending'))" 2>/dev/null || echo pending)
+        if [ "$${state}" = "done" ]; then
+          echo "migration_wait: migration completed successfully"
+          exit 0
+        fi
+        if [ "$${state}" = "error" ]; then
+          echo "migration_wait: migration FAILED: $${body}"
+          exit 1
+        fi
+        sleep 5
+      done
+      echo "migration_wait: timed out after ~15m waiting for migration to complete"
+      exit 1
+    EOT
+  }
+}
+
 resource "google_compute_region_network_endpoint_group" "neg" {
   name                  = "${var.prefix}-neg"
   region                = var.region
