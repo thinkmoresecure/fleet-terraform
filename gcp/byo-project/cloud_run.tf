@@ -50,7 +50,14 @@ module "fleet-service" {
   # revision. Without this, the API service and migration job update in
   # parallel — the new image tries to start before migrations finish,
   # fails health checks, and Cloud Run rolls back.
-  depends_on = [terracurl_request.exec]
+  #
+  # terracurl_request.exec only *triggers* the migration job (fire-and-forget
+  # `:run`), so it alone does not prevent the race. null_resource.migration_wait
+  # (gated by fleet_config.exec_migration_wait) blocks until the migration job
+  # execution actually *completes*; depending on it here gates the API rollout on
+  # real migration completion. When exec_migration_wait is false it has count=0,
+  # so this is an empty dependency and behaviour is unchanged.
+  depends_on = [terracurl_request.exec, null_resource.migration_wait]
 
   service_name                  = "fleet-api"
   project_id                    = var.project_id
