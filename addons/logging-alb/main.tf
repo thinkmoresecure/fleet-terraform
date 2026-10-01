@@ -19,8 +19,8 @@ locals {
   iam_role_prefix     = coalesce(var.iam_role_name_prefix, var.prefix)
   landing_bucket_name = "${var.prefix}-alb-logs"
   lambda_function_arns = var.enable_reencrypt_sweep ? [
-    "arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:function:${var.prefix}-alb-log-reencrypt",
-    "arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:function:${var.prefix}-alb-log-sweep",
+    "arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:function:${var.prefix}-alb-log-reencrypt",
+    "arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:function:${var.prefix}-alb-log-sweep",
   ] : []
 
   kms_base_policy_statements = var.kms_base_policy != null ? var.kms_base_policy : [
@@ -78,7 +78,7 @@ locals {
       resources = ["*"]
       principals = {
         type        = "Service"
-        identifiers = ["logs.${data.aws_region.current.id}.amazonaws.com"]
+        identifiers = ["logs.${data.aws_region.current.region}.amazonaws.com"]
       }
       conditions = []
     },
@@ -259,6 +259,8 @@ module "s3_bucket_for_logs" {
   version = "5.12.0"
 
   bucket = local.landing_bucket_name
+
+  tags = var.s3_bucket_tags
 
   # Allow deletion of non-empty bucket
   force_destroy = true
@@ -645,6 +647,8 @@ module "athena-s3-bucket" {
   version = "5.12.0"
 
   bucket = "${var.prefix}-alb-logs-athena"
+
+  tags = var.s3_bucket_tags
 
   # Allow deletion of non-empty bucket
   force_destroy = true
