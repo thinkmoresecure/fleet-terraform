@@ -256,7 +256,7 @@ resource "null_resource" "migration_wait" {
     }
     command = <<-EOT
       set -euo pipefail
-      op=$(printf '%s' "$${OP_RESPONSE:-}" | python3 -c "import sys,json; print(json.load(sys.stdin).get('name',''))" 2>/dev/null || true)
+      op=$(printf '%s' "$${OP_RESPONSE:-}" | python3 -c "import sys,json; n=json.load(sys.stdin).get('name'); print(n if isinstance(n, str) and n else '')" 2>/dev/null || true)
       if [ -z "$${op:-}" ]; then
         # Fail closed: this guard only exists when exec_migration_wait is
         # explicitly enabled, so an empty/malformed/name-less migration response
