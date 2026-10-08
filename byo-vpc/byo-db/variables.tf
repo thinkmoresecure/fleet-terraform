@@ -162,7 +162,7 @@ variable "fleet_config" {
     pid_mode                     = optional(string, null)
     command                      = optional(list(string), null)
     private_key_delivery_method  = optional(string, "ecs")
-    image                        = optional(string, "fleetdm/fleet:v4.86.1")
+    image                        = optional(string, "fleetdm/fleet:v4.92.2")
     family                       = optional(string, "fleet")
     sidecars                     = optional(list(any), [])
     depends_on                   = optional(list(any), [])
@@ -326,33 +326,33 @@ variable "fleet_config" {
       name = "fleetdm-execution-role"
     })
     software_installers = optional(object({
-      create_bucket                         = optional(bool, true)
-      bucket_name                           = optional(string, null)
-      bucket_prefix                         = optional(string, "fleet-software-installers-")
-      s3_object_prefix                      = optional(string, "")
-      cloudfront_distribution_arn           = optional(string, null)
-      enable_bucket_versioning              = optional(bool, false)
-      expire_noncurrent_versions            = optional(bool, true)
-      noncurrent_version_expiration_days    = optional(number, 30)
-      create_kms_key                        = optional(bool, false)
-      kms_key_arn                           = optional(string, null)
-      kms_alias                             = optional(string, "fleet-software-installers")
-      extra_kms_policies                    = optional(list(any), [])
-      tags                                  = optional(map(string), {})
+      create_bucket                      = optional(bool, true)
+      bucket_name                        = optional(string, null)
+      bucket_prefix                      = optional(string, "fleet-software-installers-")
+      s3_object_prefix                   = optional(string, "")
+      cloudfront_distribution_arn        = optional(string, null)
+      enable_bucket_versioning           = optional(bool, false)
+      expire_noncurrent_versions         = optional(bool, true)
+      noncurrent_version_expiration_days = optional(number, 30)
+      create_kms_key                     = optional(bool, false)
+      kms_key_arn                        = optional(string, null)
+      kms_alias                          = optional(string, "fleet-software-installers")
+      extra_kms_policies                 = optional(list(any), [])
+      tags                               = optional(map(string), {})
       }), {
-      create_bucket                         = true
-      bucket_name                           = null
-      bucket_prefix                         = "fleet-software-installers-"
-      s3_object_prefix                      = ""
-      cloudfront_distribution_arn           = null
-      enable_bucket_versioning              = false
-      expire_noncurrent_versions            = true
-      noncurrent_version_expiration_days    = 30
-      create_kms_key                        = false
-      kms_key_arn                           = null
-      kms_alias                             = "fleet-software-installers"
-      extra_kms_policies                    = []
-      tags                                  = {}
+      create_bucket                      = true
+      bucket_name                        = null
+      bucket_prefix                      = "fleet-software-installers-"
+      s3_object_prefix                   = ""
+      cloudfront_distribution_arn        = null
+      enable_bucket_versioning           = false
+      expire_noncurrent_versions         = true
+      noncurrent_version_expiration_days = 30
+      create_kms_key                     = false
+      kms_key_arn                        = null
+      kms_alias                          = "fleet-software-installers"
+      extra_kms_policies                 = []
+      tags                               = {}
     })
   })
   default = {
@@ -364,7 +364,7 @@ variable "fleet_config" {
     pid_mode                     = null
     command                      = null
     private_key_delivery_method  = "ecs"
-    image                        = "fleetdm/fleet:v4.86.1"
+    image                        = "fleetdm/fleet:v4.92.2"
     family                       = "fleet"
     sidecars                     = []
     depends_on                   = []
@@ -454,19 +454,19 @@ variable "fleet_config" {
       }
     }
     software_installers = {
-      create_bucket                         = true
-      bucket_name                           = null
-      bucket_prefix                         = "fleet-software-installers-"
-      s3_object_prefix                      = ""
-      cloudfront_distribution_arn           = null
-      enable_bucket_versioning              = false
-      expire_noncurrent_versions            = true
-      noncurrent_version_expiration_days    = 30
-      create_kms_key                        = false
-      kms_key_arn                           = null
-      kms_alias                             = "fleet-software-installers"
-      extra_kms_policies                    = []
-      tags                                  = {}
+      create_bucket                      = true
+      bucket_name                        = null
+      bucket_prefix                      = "fleet-software-installers-"
+      s3_object_prefix                   = ""
+      cloudfront_distribution_arn        = null
+      enable_bucket_versioning           = false
+      expire_noncurrent_versions         = true
+      noncurrent_version_expiration_days = 30
+      create_kms_key                     = false
+      kms_key_arn                        = null
+      kms_alias                          = "fleet-software-installers"
+      extra_kms_policies                 = []
+      tags                               = {}
     }
   }
   description = "The configuration object for Fleet itself. Fields that default to null will have their respective resources created if not specified. For published KMS blocks, legacy `enabled` is deprecated and still accepted; prefer `cmk_enabled`."
@@ -539,7 +539,7 @@ variable "alb_config" {
     https_listener_rules       = optional(any, [])
     https_overrides            = optional(any, {})
     xff_header_processing_mode = optional(string, null)
-    tls_policy                 = optional(string, "ELBSecurityPolicy-TLS13-1-2-2021-06")
+    tls_policy                 = optional(string, "ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09")
     idle_timeout               = optional(number, 905)
     internal                   = optional(bool, false)
     enable_deletion_protection = optional(bool, false)
