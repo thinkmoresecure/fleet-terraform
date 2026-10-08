@@ -258,8 +258,12 @@ resource "null_resource" "migration_wait" {
       set -euo pipefail
       op=$(printf '%s' "$${OP_RESPONSE:-}" | python3 -c "import sys,json; print(json.load(sys.stdin).get('name',''))" 2>/dev/null || true)
       if [ -z "$${op:-}" ]; then
-        echo "migration_wait: no operation name in migration response; nothing to wait on"
-        exit 0
+        # Fail closed: this guard only exists when exec_migration_wait is
+        # explicitly enabled, so an empty/malformed/name-less migration response
+        # means we CANNOT confirm completion. Halt rather than let the API
+        # revision roll out ungated (which would recreate thinkmoresecure/it#265).
+        echo "migration_wait: ERROR: no operation name in migration response; cannot confirm migration completion. Response was: $${OP_RESPONSE:-<empty>}" >&2
+        exit 1
       fi
       echo "migration_wait: waiting for migration operation $${op} to complete"
       for i in $(seq 1 180); do
